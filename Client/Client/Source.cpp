@@ -56,10 +56,7 @@ int __cdecl main(int argc, char **argv)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;  // Protocole utilisé par le serveur
 
-
-
-
-									  //Demander adresse ip et port
+	//Demander adresse ip et port
 	char host[256];
 	char port[256];
 
@@ -86,19 +83,15 @@ int __cdecl main(int argc, char **argv)
 	char username[256];
 	char password[256];
 
-	printf("Veuillez entrer votre nom d'utilisateur et votre mot de passe: ");
+	printf("Veuillez entrer votre nom d'utilisateur:\n");
 	cin >> username;
 	cin.clear();
 	cin.ignore(10000, '\n');
+
+	printf("Veuillez entrer votre mot de passe:\n");
 	cin >> password;
 	cin.clear();
 	cin.ignore(10000, '\n');
-
-
-
-
-
-
 
 	// getaddrinfo obtient l'adresse IP du host donné
 	iResult = getaddrinfo(host, port, &hints, &result);
@@ -144,11 +137,6 @@ int __cdecl main(int argc, char **argv)
 
 	printf("Connecte au serveur %s:%s\n\n", host, port);
 	freeaddrinfo(result);
-
-
-
-
-
 
 	//-----------------------------
 	// Envoyer les informations au serveur
@@ -211,9 +199,6 @@ int __cdecl main(int argc, char **argv)
 		//Test pour le thread
 		//Sleep(5000);
 		//cout << "nouveau message du server" << endl;
-
-
-
 	}
 
 	// cleanup
@@ -225,12 +210,8 @@ int __cdecl main(int argc, char **argv)
 	return 0;
 }
 
-
-
-
 //// EchoHandler ///////////////////////////////////////////////////////
 // Handles the incoming data by reflecting it back to the sender.
-
 DWORD WINAPI InputForChat(void* sd_)
 {
 	SOCKET socket = (SOCKET)sd_;
