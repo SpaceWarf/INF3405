@@ -178,24 +178,42 @@ int __cdecl main(int argc, char **argv)
 
 	//------------------------------
 	// Recevoir le resultat de la demande d'authentification
+	string auth;
 	iResult = recv(leSocket, Authenticated, 7, 0);
 	if (iResult > 0) {
 		printf("Nombre d'octets recus: %d\n", iResult);
-		Authenticated[iResult] = '\0';
-		printf("Le mot recu est %*s\n", iResult, Authenticated);
+		auth = string(Authenticated);
+		printf("Le mot recu est %*s\n", iResult, auth);
+
+		if (auth.compare("0") == 0) {
+			cout << "Mot de passe invalide. \n";
+			printf("Appuyez une touche pour finir\n");
+			getchar();
+			return 1;
+		}
+		else if (auth.compare("1") == 0) {
+			cout << "Connecté au chat en tant que " << username << endl;
+		}
+		else {
+			cout << "Connecté au chat en tant que nouvel utilisateur " << username << endl;
+		}
 	}
 	else {
 		printf("Erreur de reception : %d\n", WSAGetLastError());
 	}
 
-
+	//Thread en parrallele pour ecouter le keyboard de l'utilisateur sans empecher les nouveaux messages d'etre affiches
 	DWORD nThreadID;
 	CreateThread(0, 0, InputForChat, 0, leSocket, &nThreadID);
 
 	//boucle inifinie du chat (écoute du serveur pour les messages)
 	while (true) {
-		Sleep(5000);
-		cout << "nouveau message du server" << endl;
+		//Test pour le thread
+		//Sleep(5000);
+		//cout << "nouveau message du server" << endl;
+
+
+
 	}
 
 	// cleanup
@@ -215,12 +233,26 @@ int __cdecl main(int argc, char **argv)
 
 DWORD WINAPI InputForChat(void* sd_)
 {
+	SOCKET socket = (SOCKET)sd_;
+	int iResult;
 	char msg[200];
 	while (true) {
 		cin >> msg;
 		cin.clear();
 		cin.ignore(10000, '\n');
-		cout << msg << endl;
+
+		cout << "[tentative d'envoi de ce message]" << msg << endl;
+		iResult = send(socket, msg, 200, 0);
+		if (iResult == SOCKET_ERROR) {
+			printf("Erreur du send du message: %d\n", WSAGetLastError());
+			closesocket(socket);
+			WSACleanup();
+			printf("Appuyez une touche pour finir\n");
+			getchar();
+
+			return 1;
+		}
+
 	}
 }
 // Do Something with the information
