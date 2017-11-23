@@ -20,7 +20,7 @@ using namespace std;
 
 // External functions
 extern DWORD WINAPI EchoHandler(void* sd_);
-extern void Authenticate(char *username, char *password);
+extern void Authenticate(void *sd_, char *username, char *password);
 
 // List of Winsock error constants mapped to an interpretation string.
 // Note that this list must remain sorted by the error constants'
@@ -260,7 +260,7 @@ DWORD WINAPI EchoHandler(void* sd_)
 	readBytes = recv(sd, password, 200, 0);
 	if (readBytes > 0) {
 		cout << "Received password: " << password << " from client." << endl;
-		Authenticate(username, password);
+		Authenticate(sd_, username, password);
 		send(sd, "Connection acceptée", 22, 0);
 	}
 	else if (readBytes == SOCKET_ERROR) {
@@ -271,21 +271,21 @@ DWORD WINAPI EchoHandler(void* sd_)
 	return 0;
 }
 
-void Authenticate(char *username, char *password)
+void Authenticate(void *sd_, char *username, char *password)
 {
+	SOCKET sd = (SOCKET)sd_;
 	ifstream inFile(string(username) + ".txt");
 
 	if (inFile.good()) {
-		cout << "l'utilisateur existe." << endl;
 		string readPassword;
 		getline(inFile, readPassword);
-		cout << "mot de passe attendu: " << readPassword << endl;
-		cout << "mot de passe reçu: " << password << endl;
 		if (readPassword.compare(string(password)) == 0) {
 			cout << username << " a rejoint le chat.";
+			send(sd, "1", 4, 0);
 		}
 		else {
 			cout << "Mot de passe invalide.";
+			send(sd, "0", 4, 0);
 		}
 	}
 	else {
@@ -293,6 +293,7 @@ void Authenticate(char *username, char *password)
 		cout << "Création d'un nouvel utilisateur\n" << "  Username: " << username << "\n  Password: " << password << endl;
 		outFile << password;
 		outFile.close();
+		send(sd, "2", 4, 0);
 	}
 	inFile.close();
 }
