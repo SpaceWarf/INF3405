@@ -19,7 +19,7 @@ using namespace std;
 #pragma warning(disable : 4996)
 
 // External functions
-extern DWORD WINAPI EchoHandler(void* sd_);
+extern DWORD WINAPI ConnectionHandler(void *sd_);
 extern void Authenticate(void *sd_, char *username, char *password);
 
 // List of Winsock error constants mapped to an interpretation string.
@@ -229,7 +229,7 @@ int main(void)
 				endl;
 
 			DWORD nThreadID;
-			CreateThread(0, 0, EchoHandler, (void*)sd, 0, &nThreadID);
+			CreateThread(0, 0, ConnectionHandler, (void*)sd, 0, &nThreadID);
 		}
 		else {
 			cerr << WSAGetLastErrorMessage("Echec d'une connection.") <<
@@ -239,15 +239,9 @@ int main(void)
 	}
 }
 
-
-//// EchoHandler ///////////////////////////////////////////////////////
-// Handles the incoming data by reflecting it back to the sender.
-
-DWORD WINAPI EchoHandler(void* sd_)
+DWORD WINAPI ConnectionHandler(void* sd_)
 {
 	SOCKET sd = (SOCKET)sd_;
-
-	// Read Data from client
 	char username[200];
 	char password[200];
 	int readBytes;
