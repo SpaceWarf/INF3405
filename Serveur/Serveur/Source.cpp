@@ -248,13 +248,19 @@ DWORD WINAPI EchoHandler(void* sd_)
 	SOCKET sd = (SOCKET)sd_;
 
 	// Read Data from client
-	char readBuffer[200];
+	char username[200];
+	char password[200];
 	int readBytes;
 
-	readBytes = recv(sd, readBuffer, 200, 0);
+	readBytes = recv(sd, username, 200, 0);
 	if (readBytes > 0) {
-		cout << "Received " << readBuffer << " from client." << endl;
-		Authenticate(readBuffer);
+		cout << "Received username: " << username << " from client." << endl;
+	}
+
+	readBytes = recv(sd, password, 200, 0);
+	if (readBytes > 0) {
+		cout << "Received password: " << password << " from client." << endl;
+		//Authenticate(readBuffer);
 		send(sd, "Connection acceptée", 22, 0);
 	}
 	else if (readBytes == SOCKET_ERROR) {
