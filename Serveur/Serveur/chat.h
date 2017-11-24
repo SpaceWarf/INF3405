@@ -14,9 +14,6 @@ class Chat {
 private:
 	static const string FILE_NAME;
 	static const int MAX_N_MESSAGES;
-
-	//static int _n_messages; //probleme: le programme doit le savoir meme s'il se ferme (persistent data) 
-
 	const char* _username;
 	const char* _ip;
 	const int _port;

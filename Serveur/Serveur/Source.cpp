@@ -37,7 +37,7 @@ void broadcast(string FormattedMsg) {
 	{
 		SOCKET sd = (*i);
 		getpeername(sd, (sockaddr*)&socket_info, &sl);
-		send(sd, FormattedMsg.c_str(), 200, 0);
+		send(sd, FormattedMsg.c_str(), 300, 0);
 	}	
 }
 
@@ -252,17 +252,23 @@ void listenToMessages(void *sd_, char* username) {
 	vector<string> oldMsgs = chat.getOldMessages();
 
 	for (int i = 0; i < oldMsgs.size(); ++i) {
-		send(sd, oldMsgs.at(i).c_str(), 200, 0);
+		send(sd, oldMsgs.at(i).c_str(), 300, 0);
 	}
 
 	while (true) {
-		readBytes = recv(sd, msg, 200, 0);
+		readBytes = recv(sd, msg, 300, 0);
 		if (readBytes > 0) {
 			chat.addNewMessage(chat.formatMessage(msg));
 			cout << chat.formatMessage(msg) << endl;
 			broadcast(chat.formatMessage(msg));
 		}
 	}
+}
+
+void closeSocket(void* sd_) {
+	SOCKET sd = (SOCKET)sd_;
+	closesocket(sd);
+	Connections.erase(remove(Connections.begin(), Connections.end(), sd), Connections.end());
 }
 
 DWORD WINAPI ConnectionHandler(void* sd_)
@@ -280,8 +286,7 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 	if (readBytes > 0) {
 		exitCode = Authenticate(sd_, username, password);
 		if (exitCode == 0) {
-			closesocket(sd);
-			Connections.erase(remove(Connections.begin(), Connections.end(), sd), Connections.end());
+			closeSocket((void*)sd);
 		}
 		else {
 			listenToMessages((void*)sd, username);
@@ -291,7 +296,8 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 		cout << WSAGetLastErrorMessage("Echec de la reception !") << endl;
 	}
 
-	closesocket(sd);
+	closeSocket((void*)sd);
+	broadcast(string(username) + " has disconnected");
 
 	return 0;
 }

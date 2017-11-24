@@ -193,10 +193,10 @@ DWORD WINAPI ListenForChat(void* sd_)
 {
 	int readBytes;
 	SOCKET sd = (SOCKET)sd_;
-	char serverMsg[200];
+	char serverMsg[300];
 
 	while (true) {
-		readBytes = recv(sd, serverMsg, 200, 0);
+		readBytes = recv(sd, serverMsg, 300, 0);
 		if (readBytes > 0) {
 			cout << serverMsg << endl;
 		}
@@ -209,16 +209,23 @@ void InputForChat(SOCKET socket) {
 	string msg;
 	while (true) {
 		getline(cin, msg);
-		iResult = send(socket, msg.c_str(), 200, 0);
-		if (iResult == SOCKET_ERROR) {
-			printf("Erreur du send du message: %d\n", WSAGetLastError());
-			closesocket(socket);
-			WSACleanup();
-			printf("Appuyez une touche pour quitter le chat\n");
-			getchar();
 
-			break;
+		if (msg.length() <= 200 && msg.length() >= 1) {
+			iResult = send(socket, msg.c_str(), 200, 0);
+
+			if (iResult == SOCKET_ERROR) {
+				printf("Erreur du send du message: %d\n", WSAGetLastError());
+				closesocket(socket);
+				WSACleanup();
+				printf("Appuyez une touche pour quitter le chat\n");
+				getchar();
+				break;
+			}
 		}
+		else {
+			cout << "Un message ne peut pas dépasser 200 caractères." << endl;
+		}
+		
 	}
 }
 

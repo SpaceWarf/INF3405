@@ -1,3 +1,4 @@
 ﻿  Source.cpp
-c:\users\space\documents\inf3405\client\client\source.cpp(33): warning C4101: 'slctdAddr': unreferenced local variable
+c:\users\space\documents\inf3405\client\client\source.cpp(119): warning C4477: 'printf' : format string '%s' requires an argument of type 'char *', but variadic argument 2 has type 'std::string'
+c:\users\space\documents\inf3405\client\client\source.cpp(35): warning C4101: 'slctdAddr': unreferenced local variable
   Client.vcxproj -> C:\Users\space\Documents\INF3405\Client\Debug\Client.exe
