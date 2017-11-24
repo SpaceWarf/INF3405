@@ -17,8 +17,9 @@ using namespace std;
 #pragma warning(disable : 4996)
 
 // External functions
-extern DWORD WINAPI InputForChat(void* sd_);
+extern DWORD WINAPI ListenForChat(void* sd_);
 extern void DoSomething(char *src, char *dest);
+extern void InputForChat(SOCKET socket);
 
 int __cdecl main(int argc, char **argv)
 {
@@ -192,15 +193,9 @@ int __cdecl main(int argc, char **argv)
 
 	//Thread en parrallele pour ecouter le keyboard de l'utilisateur sans empecher les nouveaux messages d'etre affiches
 	DWORD nThreadID;
-	CreateThread(0, 0, InputForChat, 0, leSocket, &nThreadID);
+	CreateThread(0, 0, ListenForChat, 0, leSocket, &nThreadID);
 
-	//boucle inifinie du chat (écoute du serveur pour les messages)
-	while (true) {
-		//Test pour le thread
-		//Sleep(5000);
-		//cout << "nouveau message du server" << endl;
-
-	}
+	InputForChat(leSocket);
 
 	// cleanup
 	closesocket(leSocket);
@@ -211,9 +206,18 @@ int __cdecl main(int argc, char **argv)
 	return 0;
 }
 
-DWORD WINAPI InputForChat(void* sd_)
+DWORD WINAPI ListenForChat(void* sd_)
 {
-	SOCKET socket = (SOCKET)sd_;
+	//boucle inifinie du chat (écoute du serveur pour les messages)
+	while (true) {
+		//Test pour le thread
+		Sleep(5000);
+		cout << "nouveau message du server" << endl;
+
+	}
+}
+
+void InputForChat(SOCKET socket) {
 	int iResult;
 	char msg[200];
 	while (true) {
@@ -221,20 +225,22 @@ DWORD WINAPI InputForChat(void* sd_)
 		cin.clear();
 		cin.ignore(10000, '\n');
 
-		cout << "[tentative d'envoi de ce message] " << msg << endl;
+		cout << "[tentative d'envoi de ce message]: " << msg << endl;
+
 		iResult = send(socket, msg, 200, 0);
 		if (iResult == SOCKET_ERROR) {
 			printf("Erreur du send du message: %d\n", WSAGetLastError());
 			closesocket(socket);
 			WSACleanup();
-			printf("Appuyez une touche pour finir\n");
+			printf("Appuyez une touche pour quitter le chat\n");
 			getchar();
 
-			return 1;
+			break;
 		}
 
 	}
 }
+
 // Do Something with the information
 void DoSomething(char *src, char *dest)
 {

@@ -4,7 +4,7 @@ using namespace std;
 
 #pragma warning(disable : 4996)
 
-const string Chat::FILE_NAME = "chat.txt";
+const string Chat::FILE_NAME = "logs.txt";
 const int MAX_N_MESSAGES = 15;
 
 //Constructor
