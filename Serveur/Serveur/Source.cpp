@@ -9,6 +9,8 @@
 #include <locale>
 
 #include <string>
+#include "chat.h"
+#include <list>
 
 using namespace std;
 
@@ -20,7 +22,7 @@ using namespace std;
 
 // External functions
 extern DWORD WINAPI ConnectionHandler(void *sd_);
-extern void Authenticate(void *sd_, char *username, char *password);
+extern int Authenticate(void *sd_, char *username, char *password);
 
 // List of Winsock error constants mapped to an interpretation string.
 // Note that this list must remain sorted by the error constants'
@@ -133,6 +135,8 @@ const char* WSAGetLastErrorMessage(const char* pcMessagePrefix, int nErrorID = 0
 	return acErrorBuffer;
 }
 
+list<SOCKET> Connections;
+
 int main(void)
 {
 	//----------------------
@@ -219,9 +223,12 @@ int main(void)
 
 		sockaddr_in sinRemote;
 		int nAddrSize = sizeof(sinRemote);
+
 		// Create a SOCKET for accepting incoming requests.
 		// Accept the connection.
 		SOCKET sd = accept(ServerSocket, (sockaddr*)&sinRemote, &nAddrSize);
+		Connections.push_back(sd);
+
 		if (sd != INVALID_SOCKET) {
 			cout << "Connection acceptee De : " <<
 				inet_ntoa(sinRemote.sin_addr) << ":" <<
@@ -244,7 +251,7 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 	SOCKET sd = (SOCKET)sd_;
 	char username[200];
 	char password[200];
-	int readBytes;
+	int readBytes, exitCode;
 
 	readBytes = recv(sd, username, 200, 0);
 	if (readBytes > 0) {
@@ -254,14 +261,16 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 	readBytes = recv(sd, password, 200, 0);
 	if (readBytes > 0) {
 		cout << "Received password: " << password << " from client." << endl;
-		Authenticate(sd_, username, password);
-		send(sd, "Connection acceptée", 22, 0);
+		exitCode = Authenticate(sd_, username, password);
+		if (exitCode == 0) {
+			closesocket(sd);
+			Connections.erase(remove(Connections.begin(), Connections.end(), sd), Connections.end());
+		}
+		//send(sd, "Connection acceptée", 22, 0);
 	}
 	else if (readBytes == SOCKET_ERROR) {
 		cout << WSAGetLastErrorMessage("Echec de la reception !") << endl;
 	}
-
-
 
 	closesocket(sd);
 
@@ -276,10 +285,11 @@ void sendAllMessages(void* sd_) {
 
 }
 
-void Authenticate(void *sd_, char *username, char *password)
+int Authenticate(void *sd_, char *username, char *password)
 {
 	SOCKET sd = (SOCKET)sd_;
 	ifstream inFile(string(username) + ".txt");
+	int exitCode;
 
 	if (inFile.good()) {
 		string readPassword;
@@ -287,10 +297,12 @@ void Authenticate(void *sd_, char *username, char *password)
 		if (readPassword.compare(string(password)) == 0) {
 			cout << username << " a rejoint le chat.";
 			send(sd, "1", 4, 0);
+			exitCode = 1;
 		}
 		else {
 			cout << "Mot de passe invalide.";
 			send(sd, "0", 4, 0);
+			exitCode = 0;
 		}
 	}
 	else {
@@ -299,6 +311,9 @@ void Authenticate(void *sd_, char *username, char *password)
 		outFile << password;
 		outFile.close();
 		send(sd, "2", 4, 0);
+		exitCode = 2;
 	}
 	inFile.close();
+	return exitCode;
 }
+
