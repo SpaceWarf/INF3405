@@ -1,4 +1,3 @@
 ﻿  Source.cpp
-c:\users\space\documents\inf3405\client\client\source.cpp(28): warning C4101: 'slctdAddr': unreferenced local variable
-c:\users\space\documents\inf3405\client\client\source.cpp(25): warning C4101: 'motEnvoye': unreferenced local variable
+c:\users\space\documents\inf3405\client\client\source.cpp(33): warning C4101: 'slctdAddr': unreferenced local variable
   Client.vcxproj -> C:\Users\space\Documents\INF3405\Client\Debug\Client.exe

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 
+
 using namespace std;
 
 // Link avec ws2_32.lib
@@ -15,6 +16,10 @@ using namespace std;
 //To make sure there are no errors
 #pragma warning(disable : 4996)
 
+// External functions
+extern DWORD WINAPI InputForChat(void* sd_);
+extern void DoSomething(char *src, char *dest);
+
 int __cdecl main(int argc, char **argv)
 {
 	WSADATA wsaData;
@@ -22,9 +27,9 @@ int __cdecl main(int argc, char **argv)
 	struct addrinfo *result = NULL,
 		*ptr = NULL,
 		hints;
-	char motEnvoye[10];
-	char motRecu[10];
+
 	int iResult;
+	char Authenticated[10];
 	char slctdAddr[15];
 
 	//--------------------------------------------
@@ -147,7 +152,7 @@ int __cdecl main(int argc, char **argv)
 
 	//-----------------------------
 	// Envoyer les informations au serveur
-	iResult = send(leSocket, username, 7, 0);
+	iResult = send(leSocket, username, 200, 0);
 	if (iResult == SOCKET_ERROR) {
 		printf("Erreur du send: %d\n", WSAGetLastError());
 		closesocket(leSocket);
@@ -158,7 +163,7 @@ int __cdecl main(int argc, char **argv)
 		return 1;
 	}
 
-	iResult = send(leSocket, password, 7, 0);
+	iResult = send(leSocket, password, 200, 0);
 	if (iResult == SOCKET_ERROR) {
 		printf("Erreur du send: %d\n", WSAGetLastError());
 		closesocket(leSocket);
@@ -172,15 +177,25 @@ int __cdecl main(int argc, char **argv)
 	printf("Nombre d'octets envoyes : %ld\n", iResult);
 
 	//------------------------------
-	// Maintenant, on va recevoir l' information envoyée par le serveur
-	iResult = recv(leSocket, motRecu, 7, 0);
+	// Recevoir le resultat de la demande d'authentification
+	iResult = recv(leSocket, Authenticated, 7, 0);
 	if (iResult > 0) {
 		printf("Nombre d'octets recus: %d\n", iResult);
-		motRecu[iResult] = '\0';
-		printf("Le mot recu est %*s\n", iResult, motRecu);
+		Authenticated[iResult] = '\0';
+		printf("Le mot recu est %*s\n", iResult, Authenticated);
 	}
 	else {
 		printf("Erreur de reception : %d\n", WSAGetLastError());
+	}
+
+
+	DWORD nThreadID;
+	CreateThread(0, 0, InputForChat, 0, leSocket, &nThreadID);
+
+	//boucle inifinie du chat (écoute du serveur pour les messages)
+	while (true) {
+		Sleep(5000);
+		cout << "nouveau message du server" << endl;
 	}
 
 	// cleanup
@@ -190,4 +205,26 @@ int __cdecl main(int argc, char **argv)
 	printf("Appuyez une touche pour finir\n");
 	getchar();
 	return 0;
+}
+
+
+
+
+//// EchoHandler ///////////////////////////////////////////////////////
+// Handles the incoming data by reflecting it back to the sender.
+
+DWORD WINAPI InputForChat(void* sd_)
+{
+	char msg[200];
+	while (true) {
+		cin >> msg;
+		cin.clear();
+		cin.ignore(10000, '\n');
+		cout << msg << endl;
+	}
+}
+// Do Something with the information
+void DoSomething(char *src, char *dest)
+{
+
 }
