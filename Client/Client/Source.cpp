@@ -211,8 +211,6 @@ int __cdecl main(int argc, char **argv)
 	return 0;
 }
 
-//// EchoHandler ///////////////////////////////////////////////////////
-// Handles the incoming data by reflecting it back to the sender.
 DWORD WINAPI InputForChat(void* sd_)
 {
 	SOCKET socket = (SOCKET)sd_;
@@ -223,7 +221,7 @@ DWORD WINAPI InputForChat(void* sd_)
 		cin.clear();
 		cin.ignore(10000, '\n');
 
-		cout << "[tentative d'envoi de ce message]" << msg << endl;
+		cout << "[tentative d'envoi de ce message] " << msg << endl;
 		iResult = send(socket, msg, 200, 0);
 		if (iResult == SOCKET_ERROR) {
 			printf("Erreur du send du message: %d\n", WSAGetLastError());
