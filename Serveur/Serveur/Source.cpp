@@ -36,10 +36,7 @@ void broadcast(string FormattedMsg) {
 	for (std::list<SOCKET>::iterator i = Connections.begin(); i != Connections.end(); i++)
 	{
 		SOCKET sd = (*i);
-
 		getpeername(sd, (sockaddr*)&socket_info, &sl);
-		cout << "Parsing: " << inet_ntoa(socket_info.sin_addr) << ":" << ntohs(socket_info.sin_port) << endl;
-
 		send(sd, FormattedMsg.c_str(), 200, 0);
 	}	
 }
@@ -181,24 +178,6 @@ int main(void)
 	char option[] = "1";
 	setsockopt(ServerSocket, SOL_SOCKET, SO_REUSEADDR, option, sizeof(option));
 
-	////----------------------
-	//// The sockaddr_in structure specifies the address family,
-	//// IP address, and port for the socket that is being bound.
-	//int port = 5030;
-
-	////Recuperation de l'adresse locale
-	//hostent *thisHost;
-
-	////TODO Modifier l'adresse IP ci-dessous pour celle de votre poste.
-	//thisHost = gethostbyname("127.0.0.1");
-	//char* ip;
-	//ip = inet_ntoa(*(struct in_addr*) *thisHost->h_addr_list);
-	//printf("Adresse locale trouvee %s : \n\n", ip);
-	//sockaddr_in service;
-	//service.sin_family = AF_INET;
-	////service.sin_addr.s_addr = inet_addr("127.0.0.1");
-	////	service.sin_addr.s_addr = INADDR_ANY;
-
 	char addr[256];
 	int port;
 
@@ -250,11 +229,6 @@ int main(void)
 		Connections.push_back(sd);
 
 		if (sd != INVALID_SOCKET) {
-			/*cout << "Connection acceptee De : " <<
-				inet_ntoa(sinRemote.sin_addr) << ":" <<
-				ntohs(sinRemote.sin_port) << "." <<
-				endl;
-*/
 			DWORD nThreadID;
 			CreateThread(0, 0, ConnectionHandler, (void*)sd, 0, &nThreadID);
 		}
@@ -275,12 +249,16 @@ void listenToMessages(void *sd_, char* username) {
 	getpeername(sd, (sockaddr*)&socket_info, &sl);
 
 	Chat chat(username, inet_ntoa(socket_info.sin_addr), ntohs(socket_info.sin_port));
+	vector<string> oldMsgs = chat.getOldMessages();
+
+	for (int i = 0; i < oldMsgs.size(); ++i) {
+		send(sd, oldMsgs.at(i).c_str(), 200, 0);
+	}
 
 	while (true) {
 		readBytes = recv(sd, msg, 200, 0);
 		if (readBytes > 0) {
-			cout << "message is: " << msg << endl;
-			//cout << "Received messsage: " << msg << " from " << username << " at " << inet_ntoa(socket_info.sin_addr) << ":" << ntohs(socket_info.sin_port) << endl;
+			chat.addNewMessage(chat.formatMessage(msg));
 			cout << chat.formatMessage(msg) << endl;
 			broadcast(chat.formatMessage(msg));
 		}
@@ -296,12 +274,10 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 
 	readBytes = recv(sd, username, 200, 0);
 	if (readBytes > 0) {
-		//cout << "Received username: " << username << " from client." << endl;
 	}
 
 	readBytes = recv(sd, password, 200, 0);
 	if (readBytes > 0) {
-		//cout << "Received password: " << password << " from client." << endl;
 		exitCode = Authenticate(sd_, username, password);
 		if (exitCode == 0) {
 			closesocket(sd);
@@ -310,7 +286,6 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 		else {
 			listenToMessages((void*)sd, username);
 		}
-		//send(sd, "Connection acceptée", 22, 0);
 	}
 	else if (readBytes == SOCKET_ERROR) {
 		cout << WSAGetLastErrorMessage("Echec de la reception !") << endl;

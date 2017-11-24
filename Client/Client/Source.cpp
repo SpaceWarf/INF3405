@@ -59,44 +59,34 @@ int __cdecl main(int argc, char **argv)
 	hints.ai_protocol = IPPROTO_TCP;  // Protocole utilisé par le serveur
 
 	//Demander adresse ip et port
-	char host[256];
-	char port[256];
+	string host;
+	string port;
 
 	printf("Entrez l'adresse ip du serveur\n");
-	cin >> host;
-	cin.clear();
-	cin.ignore(10000, '\n');
+	getline(cin, host);
 	//cout << "Ce que inet_adrr retourne: " << inet_addr(ip) << endl;
-	while (!inet_addr(host)) {
+	while (!inet_addr(host.c_str())) {
 		printf("Cette adresse est invalide. Veuillez entrer une adresse valide\n");
 		//cout << "Ce que inet_adrr retourne: " << inet_addr(ip) << endl;
-		cin >> host;
-		cin.clear();
-		cin.ignore(10000, '\n');
+		getline(cin, host);
 	}
 
 	printf("Entrez le port du serveur\n");
-	cin >> port;
-	cin.clear();
-	cin.ignore(10000, '\n');
+	getline(cin, port);
 
 	//----------------------------
 	// Demander à l'usager nom et mot de passe
-	char username[256];
-	char password[256];
+	string username;
+	string password;
 
 	printf("Veuillez entrer votre nom d'utilisateur:\n");
-	cin >> username;
-	cin.clear();
-	cin.ignore(10000, '\n');
+	getline(cin, username);
 
 	printf("Veuillez entrer votre mot de passe:\n");
-	cin >> password;
-	cin.clear();
-	cin.ignore(10000, '\n');
+	getline(cin, password);
 
 	// getaddrinfo obtient l'adresse IP du host donné
-	iResult = getaddrinfo(host, port, &hints, &result);
+	iResult = getaddrinfo(host.c_str(), port.c_str(), &hints, &result);
 	if (iResult != 0) {
 		printf("Erreur de getaddrinfo: %d\n", iResult);
 		WSACleanup();
@@ -121,9 +111,6 @@ int __cdecl main(int argc, char **argv)
 
 	sockaddr_in *adresse;
 	adresse = (struct sockaddr_in *) result->ai_addr;
-	//----------------------------------------------------
-	printf("Adresse trouvee pour le serveur %s : %s\n\n", host, inet_ntoa(adresse->sin_addr));
-	printf("Tentative de connexion au serveur %s avec le port %s\n\n", inet_ntoa(adresse->sin_addr), port);
 
 	// On va se connecter au serveur en utilisant l'adresse qui se trouve dans
 	// la variable result.
@@ -137,12 +124,11 @@ int __cdecl main(int argc, char **argv)
 		return 1;
 	}
 
-	printf("Connecte au serveur %s:%s\n\n", host, port);
 	freeaddrinfo(result);
 
 	//-----------------------------
 	// Envoyer les informations au serveur
-	iResult = send(leSocket, username, 200, 0);
+	iResult = send(leSocket, username.c_str(), 200, 0);
 	if (iResult == SOCKET_ERROR) {
 		printf("Erreur du send: %d\n", WSAGetLastError());
 		closesocket(leSocket);
@@ -153,7 +139,7 @@ int __cdecl main(int argc, char **argv)
 		return 1;
 	}
 
-	iResult = send(leSocket, password, 200, 0);
+	iResult = send(leSocket, password.c_str(), 200, 0);
 	if (iResult == SOCKET_ERROR) {
 		printf("Erreur du send: %d\n", WSAGetLastError());
 		closesocket(leSocket);
@@ -163,15 +149,12 @@ int __cdecl main(int argc, char **argv)
 
 		return 1;
 	}
-
-	printf("Nombre d'octets envoyes : %ld\n", iResult);
 
 	//------------------------------
 	// Recevoir le resultat de la demande d'authentification
 	string auth;
 	iResult = recv(leSocket, Authenticated, 4, 0);
 	if (iResult > 0) {
-		printf("Nombre d'octets recus: %d\n", iResult);
 		auth = string(Authenticated);
 		//printf("Le mot recu est %*s\n", iResult, auth);
 
@@ -225,11 +208,7 @@ void InputForChat(SOCKET socket) {
 	int iResult;
 	string msg;
 	while (true) {
-		//cin >> noskipws >> msg;
 		getline(cin, msg);
-		//cin.clear();
-		//cin.ignore(10000, '\n');
-
 		iResult = send(socket, msg.c_str(), 200, 0);
 		if (iResult == SOCKET_ERROR) {
 			printf("Erreur du send du message: %d\n", WSAGetLastError());
@@ -240,7 +219,6 @@ void InputForChat(SOCKET socket) {
 
 			break;
 		}
-
 	}
 }
 

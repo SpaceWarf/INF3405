@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <ctime>
 #include <sstream>
+#include <vector>
 
 
 using namespace std;
@@ -30,10 +31,10 @@ public:
 	~Chat() {};
 
 	
-	void addNewMessage(char* msg);
+	void addNewMessage(string msg);
 
 	
-	char** getOldMessages();
+	vector<string> getOldMessages();
 	string formatMessage(string msg);
 
 };

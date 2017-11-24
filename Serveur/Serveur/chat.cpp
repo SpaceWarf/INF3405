@@ -15,20 +15,38 @@ Chat::Chat(char* username, char* ip, int port) :
 }
 
 //Add a new message to the chat file
-void Chat::addNewMessage(char* msg)
+void Chat::addNewMessage(string msg)
 {
+	ofstream outFile("logs/logs.txt", ios_base::app);
+	outFile << msg << "\n";
+}
 
+int getFileLength(string file) {
+	ifstream inFile(file);
+	string line;
+	int nLines = 0;
+
+	while (getline(inFile, line))
+		++nLines;
+
+	return nLines;
 }
 
 //Returns all the old 15 messages (or less than 15)
-char** Chat::getOldMessages()
+vector<string> Chat::getOldMessages()
 {
-	char* results[15];
-	for (int i = 0; i < 15; i++) {
-		char* msg = "iqutrye"; //Aller chercher les 15 derniers messages
-		results[i] = msg;
+	int nLines = getFileLength("logs/logs.txt");
+	string line;
+	vector<string> msgs;
+	ifstream inFile("logs/logs.txt");
+
+	for (int i = 0; i < nLines && getline(inFile, line); ++i) {
+		if (i >= nLines - 15) {
+			msgs.push_back(line);
+		}
 	}
-	return results;
+		
+	return msgs;
 }
 //Returns the full fomrmatted str message 
 string Chat::formatMessage(string msg)
