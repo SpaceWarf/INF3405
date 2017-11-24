@@ -223,7 +223,7 @@ void InputForChat(SOCKET socket) {
 			}
 		}
 		else {
-			cout << "Un message ne peut pas dépasser 200 caractères." << endl;
+			cout << "Un message doit contenir de 1 à 200 caractères." << endl;
 		}
 		
 	}
