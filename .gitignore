@@ -3,7 +3,8 @@
 
 # But not these files...
 !.gitignore
-!Source.cpp
+!*.cpp
+!.h
 
 # ...even if they are in subdirectories
 !*/

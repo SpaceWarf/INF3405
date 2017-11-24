@@ -171,7 +171,7 @@ int __cdecl main(int argc, char **argv)
 	if (iResult > 0) {
 		printf("Nombre d'octets recus: %d\n", iResult);
 		auth = string(Authenticated);
-		printf("Le mot recu est %*s\n", iResult, auth);
+		//printf("Le mot recu est %*s\n", iResult, auth);
 
 		if (auth.compare("0") == 0) {
 			cout << "Mot de passe invalide. \n";
@@ -199,6 +199,7 @@ int __cdecl main(int argc, char **argv)
 		//Test pour le thread
 		//Sleep(5000);
 		//cout << "nouveau message du server" << endl;
+
 	}
 
 	// cleanup

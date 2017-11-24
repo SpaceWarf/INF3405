@@ -260,9 +260,20 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 	else if (readBytes == SOCKET_ERROR) {
 		cout << WSAGetLastErrorMessage("Echec de la reception !") << endl;
 	}
+
+
+
 	closesocket(sd);
 
 	return 0;
+}
+
+void sendAllMessages(void* sd_) {
+	SOCKET sd = (SOCKET)sd_;
+	ifstream is_msg("chat.txt");
+
+
+
 }
 
 void Authenticate(void *sd_, char *username, char *password)
