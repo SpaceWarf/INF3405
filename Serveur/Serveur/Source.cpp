@@ -28,11 +28,19 @@ extern int Authenticate(void *sd_, char *username, char *password);
 //Liste globale des sockets connectées
 list<SOCKET> Connections;
 
-void broadcast(char* FormattedMsg) {
+void broadcast(string FormattedMsg) {
+
+	sockaddr_in socket_info = { 0 };
+	int sl = sizeof(socket_info);
+
 	for (std::list<SOCKET>::iterator i = Connections.begin(); i != Connections.end(); i++)
 	{
 		SOCKET sd = (*i);
-		send(sd, FormattedMsg, 4, 0);
+
+		getpeername(sd, (sockaddr*)&socket_info, &sl);
+		cout << "Parsing: " << inet_ntoa(socket_info.sin_addr) << ":" << ntohs(socket_info.sin_port) << endl;
+
+		send(sd, FormattedMsg.c_str(), 200, 0);
 	}	
 }
 
@@ -149,8 +157,6 @@ const char* WSAGetLastErrorMessage(const char* pcMessagePrefix, int nErrorID = 0
 	return acErrorBuffer;
 }
 
-list<SOCKET> Connections;
-
 int main(void)
 {
 	//----------------------
@@ -244,11 +250,11 @@ int main(void)
 		Connections.push_back(sd);
 
 		if (sd != INVALID_SOCKET) {
-			cout << "Connection acceptee De : " <<
+			/*cout << "Connection acceptee De : " <<
 				inet_ntoa(sinRemote.sin_addr) << ":" <<
 				ntohs(sinRemote.sin_port) << "." <<
 				endl;
-
+*/
 			DWORD nThreadID;
 			CreateThread(0, 0, ConnectionHandler, (void*)sd, 0, &nThreadID);
 		}
@@ -256,6 +262,27 @@ int main(void)
 			cerr << WSAGetLastErrorMessage("Echec d'une connection.") <<
 				endl;
 			// return 1;
+		}
+	}
+}
+
+void listenToMessages(void *sd_, char* username) {
+	int readBytes;
+	char msg[200];
+	SOCKET sd = (SOCKET)sd_;
+	sockaddr_in socket_info = {0};
+	int sl = sizeof(socket_info);
+	getpeername(sd, (sockaddr*)&socket_info, &sl);
+
+	Chat chat(username, inet_ntoa(socket_info.sin_addr), ntohs(socket_info.sin_port));
+
+	while (true) {
+		readBytes = recv(sd, msg, 200, 0);
+		if (readBytes > 0) {
+			cout << "message is: " << msg << endl;
+			//cout << "Received messsage: " << msg << " from " << username << " at " << inet_ntoa(socket_info.sin_addr) << ":" << ntohs(socket_info.sin_port) << endl;
+			cout << chat.formatMessage(msg) << endl;
+			broadcast(chat.formatMessage(msg));
 		}
 	}
 }
@@ -269,16 +296,19 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 
 	readBytes = recv(sd, username, 200, 0);
 	if (readBytes > 0) {
-		cout << "Received username: " << username << " from client." << endl;
+		//cout << "Received username: " << username << " from client." << endl;
 	}
 
 	readBytes = recv(sd, password, 200, 0);
 	if (readBytes > 0) {
-		cout << "Received password: " << password << " from client." << endl;
+		//cout << "Received password: " << password << " from client." << endl;
 		exitCode = Authenticate(sd_, username, password);
 		if (exitCode == 0) {
 			closesocket(sd);
 			Connections.erase(remove(Connections.begin(), Connections.end(), sd), Connections.end());
+		}
+		else {
+			listenToMessages((void*)sd, username);
 		}
 		//send(sd, "Connection acceptée", 22, 0);
 	}
@@ -309,12 +339,12 @@ int Authenticate(void *sd_, char *username, char *password)
 		string readPassword;
 		getline(inFile, readPassword);
 		if (readPassword.compare(string(password)) == 0) {
-			cout << username << " a rejoint le chat.";
+			cout << username << " a rejoint le chat." << endl;
 			send(sd, "1", 4, 0);
 			exitCode = 1;
 		}
 		else {
-			cout << "Mot de passe invalide.";
+			cout << "Mot de passe invalide." << endl;
 			send(sd, "0", 4, 0);
 			exitCode = 0;
 		}

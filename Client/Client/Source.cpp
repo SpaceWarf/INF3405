@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <vector>
 
 
 using namespace std;
@@ -168,7 +169,7 @@ int __cdecl main(int argc, char **argv)
 	//------------------------------
 	// Recevoir le resultat de la demande d'authentification
 	string auth;
-	iResult = recv(leSocket, Authenticated, 7, 0);
+	iResult = recv(leSocket, Authenticated, 4, 0);
 	if (iResult > 0) {
 		printf("Nombre d'octets recus: %d\n", iResult);
 		auth = string(Authenticated);
@@ -191,9 +192,8 @@ int __cdecl main(int argc, char **argv)
 		printf("Erreur de reception : %d\n", WSAGetLastError());
 	}
 
-	//Thread en parrallele pour ecouter le keyboard de l'utilisateur sans empecher les nouveaux messages d'etre affiches
 	DWORD nThreadID;
-	CreateThread(0, 0, ListenForChat, 0, leSocket, &nThreadID);
+	CreateThread(0, 0, ListenForChat, (void*)leSocket, 0, &nThreadID);
 
 	InputForChat(leSocket);
 
@@ -208,26 +208,29 @@ int __cdecl main(int argc, char **argv)
 
 DWORD WINAPI ListenForChat(void* sd_)
 {
-	//boucle inifinie du chat (écoute du serveur pour les messages)
-	while (true) {
-		//Test pour le thread
-		Sleep(5000);
-		cout << "nouveau message du server" << endl;
+	int readBytes;
+	SOCKET sd = (SOCKET)sd_;
+	char serverMsg[200];
 
+	while (true) {
+		readBytes = recv(sd, serverMsg, 200, 0);
+		if (readBytes > 0) {
+			cout << serverMsg << endl;
+		}
 	}
+	return 0;
 }
 
 void InputForChat(SOCKET socket) {
 	int iResult;
-	char msg[200];
+	string msg;
 	while (true) {
-		cin >> msg;
-		cin.clear();
-		cin.ignore(10000, '\n');
+		//cin >> noskipws >> msg;
+		getline(cin, msg);
+		//cin.clear();
+		//cin.ignore(10000, '\n');
 
-		cout << "[tentative d'envoi de ce message]: " << msg << endl;
-
-		iResult = send(socket, msg, 200, 0);
+		iResult = send(socket, msg.c_str(), 200, 0);
 		if (iResult == SOCKET_ERROR) {
 			printf("Erreur du send du message: %d\n", WSAGetLastError());
 			closesocket(socket);
