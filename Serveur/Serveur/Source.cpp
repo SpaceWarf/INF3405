@@ -20,7 +20,7 @@ using namespace std;
 
 // External functions
 extern DWORD WINAPI EchoHandler(void* sd_);
-extern void Authenticate(char *src);
+extern void Authenticate(char *username, char *password);
 
 // List of Winsock error constants mapped to an interpretation string.
 // Note that this list must remain sorted by the error constants'
@@ -184,7 +184,7 @@ int main(void)
 	cin.ignore(10000, '\n');
 
 	do {
-		printf("Entrez le port du serveur (5000-5050)");
+		printf("Entrez le port du serveur (5000-5050):\n");
 		cin >> port;
 		cin.clear();
 		cin.ignore(10000, '\n');
@@ -248,13 +248,13 @@ DWORD WINAPI EchoHandler(void* sd_)
 	SOCKET sd = (SOCKET)sd_;
 
 	// Read Data from client
-	char readBuffer[200];
+	char usernameBuffer[200];
 	int readBytes;
 
-	readBytes = recv(sd, readBuffer, 200, 0);
+	readBytes = recv(sd, usernameBuffer, 200, 0);
 	if (readBytes > 0) {
-		cout << "Received " << readBuffer << " from client." << endl;
-		Authenticate(readBuffer);
+		cout << usernameBuffer << " tente de se connecter." << endl;
+		Authenticate(usernameBuffer, "password");
 		send(sd, "Connection acceptée", 22, 0);
 	}
 	else if (readBytes == SOCKET_ERROR) {
@@ -264,11 +264,29 @@ DWORD WINAPI EchoHandler(void* sd_)
 
 	return 0;
 }
-// Do Something with the information
-void Authenticate(char *src)
+
+void Authenticate(char *username, char *password)
 {
-	ofstream myfile;
-	myfile.open("credentials.txt");
-	myfile << src;
-	myfile.close();
+	ifstream inFile(string(username) + ".txt");
+	ofstream outFile(string(username) + ".txt");
+
+	if (inFile.good()) {
+		cout << "l'utilisateur existe." << endl;
+		string readPassword;
+		inFile >> readPassword;
+		readPassword = readPassword.data();
+		cout << "mot de passe attendu: " << readPassword << endl;
+		cout << "mot de passe reçu: " << password << endl;
+		if (readPassword.compare(string(password)) == 0) {
+			cout << username << " a rejoint le chat.";
+		}
+		else {
+			cout << "Mot de passe invalide.";
+		}
+	}
+	else {
+		cout << "Création d'un nouvel utilisateur\n" << "  Username: " << username << "\n  Password: " << password << endl;
+		outFile << password;
+	}
+	inFile.close();
 }
