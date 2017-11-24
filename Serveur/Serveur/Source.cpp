@@ -13,6 +13,7 @@
 #include "chat.h"
 #include <list>
 
+
 using namespace std;
 
 // link with Ws2_32.lib
@@ -40,7 +41,6 @@ void broadcast(string FormattedMsg) {
 		send(sd, FormattedMsg.c_str(), 300, 0);
 	}	
 }
-
 
 
 // List of Winsock error constants mapped to an interpretation string.

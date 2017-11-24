@@ -41,7 +41,7 @@ vector<string> Chat::getOldMessages()
 	ifstream inFile("logs/logs.txt");
 
 	for (int i = 0; i < nLines && getline(inFile, line); ++i) {
-		if (i >= nLines - 15) {
+		if (i >= nLines - 30) {
 			msgs.push_back(line);
 		}
 	}

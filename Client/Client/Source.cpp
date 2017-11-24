@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include <regex>
 
 using namespace std;
 
@@ -21,6 +21,15 @@ using namespace std;
 extern DWORD WINAPI ListenForChat(void* sd_);
 extern void DoSomething(char *src, char *dest);
 extern void InputForChat(SOCKET socket);
+
+bool isValidIP(string ip) {
+	
+	smatch m;
+	regex e("^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$");
+
+	return (regex_search(ip, m, e));
+
+}
 
 int __cdecl main(int argc, char **argv)
 {
@@ -62,17 +71,20 @@ int __cdecl main(int argc, char **argv)
 	string host;
 	string port;
 
-	printf("Entrez l'adresse ip du serveur\n");
-	getline(cin, host);
-	//cout << "Ce que inet_adrr retourne: " << inet_addr(ip) << endl;
-	while (!inet_addr(host.c_str())) {
-		printf("Cette adresse est invalide. Veuillez entrer une adresse valide\n");
-		//cout << "Ce que inet_adrr retourne: " << inet_addr(ip) << endl;
+	do {
+		printf("Entrez l'adresse du serveur:\n");
 		getline(cin, host);
-	}
+		if (!isValidIP(host))
+			printf("L'adresse ip est invalide\n");
+	} while (!isValidIP(host));
 
-	printf("Entrez le port du serveur\n");
-	getline(cin, port);
+	do {
+		printf("Entrez le port du serveur (5000-5050):\n");
+		getline(cin, port);
+		if (atoi(port.c_str()) < 5000 || atoi(port.c_str()) > 5050)
+			printf("le port doit être un nombre entre 5000 et 5050\n");
+	} while (atoi(port.c_str()) < 5000 || atoi(port.c_str()) > 5050);
+	
 
 	//----------------------------
 	// Demander à l'usager nom et mot de passe
