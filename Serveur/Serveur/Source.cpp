@@ -274,13 +274,11 @@ DWORD WINAPI EchoHandler(void* sd_)
 void Authenticate(char *username, char *password)
 {
 	ifstream inFile(string(username) + ".txt");
-	ofstream outFile(string(username) + ".txt");
 
 	if (inFile.good()) {
 		cout << "l'utilisateur existe." << endl;
 		string readPassword;
-		inFile >> readPassword;
-		readPassword = readPassword.data();
+		getline(inFile, readPassword);
 		cout << "mot de passe attendu: " << readPassword << endl;
 		cout << "mot de passe reçu: " << password << endl;
 		if (readPassword.compare(string(password)) == 0) {
@@ -291,8 +289,10 @@ void Authenticate(char *username, char *password)
 		}
 	}
 	else {
+		ofstream outFile(string(username) + ".txt");
 		cout << "Création d'un nouvel utilisateur\n" << "  Username: " << username << "\n  Password: " << password << endl;
 		outFile << password;
+		outFile.close();
 	}
 	inFile.close();
 }
