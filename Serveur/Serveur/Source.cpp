@@ -242,7 +242,7 @@ int main(void)
 
 void listenToMessages(void *sd_, char* username) {
 	int readBytes;
-	char msg[200];
+	char msg[300];
 	SOCKET sd = (SOCKET)sd_;
 	sockaddr_in socket_info = {0};
 	int sl = sizeof(socket_info);

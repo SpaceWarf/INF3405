@@ -211,7 +211,7 @@ void InputForChat(SOCKET socket) {
 		getline(cin, msg);
 
 		if (msg.length() <= 200 && msg.length() >= 1) {
-			iResult = send(socket, msg.c_str(), 200, 0);
+			iResult = send(socket, msg.c_str(), 300, 0);
 
 			if (iResult == SOCKET_ERROR) {
 				printf("Erreur du send du message: %d\n", WSAGetLastError());
