@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <strstream>
 #include <locale>
+#include <list>
 
 #include <string>
 
@@ -21,6 +22,19 @@ using namespace std;
 // External functions
 extern DWORD WINAPI ConnectionHandler(void *sd_);
 extern void Authenticate(void *sd_, char *username, char *password);
+
+//Liste globale des sockets connectées
+list<SOCKET> Connections;
+
+void broadcast(char* FormattedMsg) {
+	for (std::list<SOCKET>::iterator i = Connections.begin(); i != Connections.end(); i++)
+	{
+		SOCKET sd = (*i);
+		send(sd, FormattedMsg, 4, 0);
+	}	
+}
+
+
 
 // List of Winsock error constants mapped to an interpretation string.
 // Note that this list must remain sorted by the error constants'
