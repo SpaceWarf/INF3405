@@ -1,6 +1,3 @@
 ﻿  Source.cpp
-c:\users\space\documents\inf3405\serveur\serveur\source.cpp(254): warning C4018: '<': signed/unsigned mismatch
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  chat.cpp
+c:\users\space\documents\inf3405\serveur\serveur\source.cpp(255): warning C4018: '<': signed/unsigned mismatch
   Serveur.vcxproj -> C:\Users\space\Documents\INF3405\Serveur\Debug\Serveur.exe

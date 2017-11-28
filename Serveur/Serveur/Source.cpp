@@ -262,6 +262,13 @@ void listenToMessages(void *sd_, char* username) {
 			cout << chat.formatMessage(msg) << endl;
 			broadcast(chat.formatMessage(msg));
 		}
+		else {
+			cout << string(username) + " disconnected" << endl;
+			closesocket(sd);
+			Connections.erase(remove(Connections.begin(), Connections.end(), sd), Connections.end());
+			broadcast(string(username) + " disconnected");
+			return;
+		}
 	}
 }
 
@@ -295,10 +302,7 @@ DWORD WINAPI ConnectionHandler(void* sd_)
 	else if (readBytes == SOCKET_ERROR) {
 		cout << WSAGetLastErrorMessage("Echec de la reception !") << endl;
 	}
-
 	closeSocket((void*)sd);
-	broadcast(string(username) + " has disconnected");
-
 	return 0;
 }
 
